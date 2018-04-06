@@ -1,0 +1,21 @@
+import sys
+from pyspark import SparkContext, SparkConf
+from pyspark.streaming import StreamingContext
+from pyspark.streaming.kafka import KafkaUtils
+from uuid import uuid1
+if __name__ == "__main__":
+
+    conf = SparkConf().setAppName("airports").setMaster("local[*]")
+    sc = SparkContext(conf=conf)
+    ssc = StreamingContext(sc, 2) # 2 second window
+    topics = ["test1"]
+    broker = {"metadata.broker.list": "localhost:9092"}
+
+    map1={'spark-kafka':'test1'}
+    kvs= KafkaUtils.createDirectStream(ssc, topics, broker)
+    lines = kvs.map(lambda x: x[1])
+
+    lines.pprint()
+
+    ssc.start()
+    ssc.awaitTermination()
